@@ -14,7 +14,7 @@ Args:
 Returns:
   the last active state
 "
-  (let ((insp (instance state-machine-inspector :init sm :root-name root-name)))
+  (let ((insp (instance state-machine-inspector :init sm :root-name root-name)) act doc)
     (unix::usleep (round (* 0.5 1e6)))
     (send sm :reset-state)
     (send insp :publish-structure) ;; publish once and latch
@@ -25,7 +25,10 @@ Returns:
       (when spin
         (send insp :spin-once)
         (if (and (boundp '*ri*) *ri*) (send *ri* :spin-once)))
-      (send insp :publish-status mydata)
+      (setq act (send (send sm :active-state) :action))
+      (setq doc (documentation act))
+      (send insp :publish-status mydata sm (format nil "/~A" root-name)
+            (cond ((stringp doc) doc) (t (string (send (send sm :active-state) :name)))))
       (when (send sm :goal-reached)
         (return))
       (when iterate

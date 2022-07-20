@@ -196,6 +196,8 @@
    (send-super :init name))
   ;; check if this state is state-machine, then return it
   (:submachine () (if (derivedp action state-machine) action nil))
+  ;; accessor to action
+  (:action (&rest args) (forward-message-to action args))
   ;; remap userdata names
   (:remap-list
    (&rest args)
