@@ -25,6 +25,7 @@
    (let ((node (car args)))
      (cond ((null node) ;; getter
             (case (length active-state)
+                  (format nil "active-state: ~A" active-state)
               (1 (car active-state))
               (t active-state)))
            ((listp node) ;; setter for multiple nodes
