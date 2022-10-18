@@ -1,9 +1,9 @@
 ;; state-machine-utils.l
 
 (defun exec-state-machine (sm &optional (mydata '(nil))
-                           &key (spin t) (hz 1) (root-name "SM_ROOT") (srv-name "/server_name")
-                                iterate exit-state
-                                (exit-signal-hook-func '(lambda-closure nil 0 0 (userdata))))
+                           &key (spin t) (hz 1) (root-name "SM_ROOT") (srv-name "/server_name") iterate
+                           (before-hook-func) (after-hook-func)
+                           )
   "Execute state machine
 
 Args:
@@ -46,7 +46,9 @@ Returns:
              (ros::ros-warn "aborting...")
              (return))
           (t (error "value of key :iterate must be t or function"))))))
+      (if before-hook-func (funcall before-hook-func))
       (send sm :execute mydata :step -1)
+      (if after-hook-func (funcall after-hook-func))
       (ros::sleep))
     (send sm :active-state)))
 
