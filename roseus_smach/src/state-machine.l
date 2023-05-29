@@ -212,9 +212,32 @@
               (exec-result nil)
               ;; (exec-result  (send last-state :execute userdata))
               )
-         (ros::ros-debug "trans: ~A" trans)
-         ;; (setq trans '(lambda(tr)(send tr :check exec-result)) trans))
+         ;; (ros::ros-error "trans: ~A" trans)
+         (ros::ros-error "trans to: ~A" (list trans))
+         (ros::ros-error "trans name: ~A" (send-all trans :name))
+         (ros::ros-error "trans :skip index: ~A" (position :skip (send-all trans :name)))
+         (ros::ros-error "integerp: ~A" (integerp (position :skip (send-all trans :name))))
+         (ros::ros-error ":skip transition: ~A" (if (integerp (position :skip (send-all trans :name)))
+                                                    (elt (car (list trans)) (position :skip (send-all trans :name)))))
+         ;; (ros::ros-error "member: ~A" (find :skip (send-all trans :name)))
+         ;; (ros::ros-error "member-name: ~A" (find :skip (list trans) :key #'(lambda (x) (car (send-all x :name))))) ;; this is not worked correctly
+         (ros::ros-error "mapcar ~A" (find #'(lambda (x) (send-all x :name)) (list trans)))
+         (ros::ros-error "mapcar-member-name ~A" (find :skip (car (mapcar #'(lambda (x) (send-all x :name)) (list trans)))))
+         (if (integerp (position :skip (send-all trans :name)))
+             (setq trans (list (elt (car (list trans)) (position :skip (send-all trans :name))))))
+         (ros::ros-error "trans after skip ~A ~%name: ~A ~%to: ~A"
+                         trans
+                         (send-all trans :name)
+                         (send-all trans :to))
          (setq trans-list (append trans-list (list trans)))
+         ;; (if (trans))
+         ;;     (progn
+         ;;       (setq exec-result :skip)
+         ;;       (setq trans '(lambda(tr)(send tr :check exec-result)) trans))
+         ;;     (setq trans (car (list trans))))
+         
+         ;; (setq trans '(lambda(tr)(send tr :check exec-result)) trans))
+         
          ;; (case (length trans)
          ;;   (0 (error "undefined transition ~A from ~A~%" exec-result last-state))
          ;;   (1 t) ;; OK
@@ -227,6 +250,7 @@
            (error "active state has not changed ~A -> ~A~%" last-state astate)
            (return-from :execute-impl (send astate :name)))
          (setq next-active-state (append next-active-state (send-all trans :to)))
+         (ros::ros-error "next-active-state: ~A" next-active-state)
          (if (send astate :submachine)
              (send (send astate :submachine) :reset-state))
          (push exec-result ret)))
