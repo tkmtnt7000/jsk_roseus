@@ -28,6 +28,7 @@ Returns:
         (when spin
           (send insp :spin-once)
           (if (and (boundp '*ri*) *ri*) (send *ri* :spin-once)))
+        (if before-hook-func (funcall before-hook-func mydata))
         (send insp :publish-status mydata)
         (when (send sm :goal-reached)
           (return))
@@ -43,7 +44,7 @@ Returns:
                (ros::ros-warn "aborting...")
                (return))
             (t (error "value of key :iterate must be t or function"))))))
-        (if before-hook-func (funcall before-hook-func mydata))
+        ;; (if before-hook-func (funcall before-hook-func mydata))
         (send sm :execute mydata :step -1)
         (if after-hook-func (funcall after-hook-func mydata))
         (ros::sleep))
