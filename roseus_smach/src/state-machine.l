@@ -115,7 +115,7 @@
              (if names (setq arg-keys names) arg-keys))
 
   (:execute-impl
-   (userdata &key (step 0))
+   (userdata &key (step 0) (skip nil))
    ;; check if goal reached and returns goal state name
    (when (send self :goal-reached)
        (return-from :execute-impl
@@ -172,6 +172,7 @@
      (warning-message 3 "State machine ~A '~A' :'~A' --> '~A'~%"
                       (if (send self :goal-test next-active-state) "terminating" "transitioning")
                       (send-all active-state :name) (send-all (flatten trans-list) :name) (send-all next-active-state :name))
+     (warning-message 2 "[] active-state: ~A, next-active-state: ~A~%" active-state next-active-state)
      (setq active-state (unique next-active-state))
      ret))
 
@@ -201,6 +202,7 @@
    (userdata)
    """
    Skip state forcefully
+   Now only single-line graphs are supported
    """
    ;; execute once on this machine
    (let (ret next-active-state trans-list)
@@ -223,6 +225,7 @@
          ;; (ros::ros-error "member-name: ~A" (find :skip (list trans) :key #'(lambda (x) (car (send-all x :name))))) ;; this is not worked correctly
          (ros::ros-error "mapcar ~A" (find #'(lambda (x) (send-all x :name)) (list trans)))
          (ros::ros-error "mapcar-member-name ~A" (find :skip (car (mapcar #'(lambda (x) (send-all x :name)) (list trans)))))
+         ;; if state has :skip symbol, state changes to the state defined as the direction
          (if (integerp (position :skip (send-all trans :name)))
              (setq trans (list (elt (car (list trans)) (position :skip (send-all trans :name))))))
          (ros::ros-error "trans after skip ~A ~%name: ~A ~%to: ~A"
